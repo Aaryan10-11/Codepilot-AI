@@ -1,0 +1,68 @@
+name: codepilot
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-codepilot}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-codepilot_dev_password}
+      POSTGRES_DB: ${POSTGRES_DB:-codepilot}
+    ports:
+      # Host port is configurable so a native PostgreSQL install on 5432 does
+      # not block the stack. The backend container always uses port 5432.
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+    restart: unless-stopped
+
+  qdrant:
+    image: qdrant/qdrant:v1.20.0
+    ports:
+      - "6333:6333" # REST
+      - "6334:6334" # gRPC
+    volumes:
+      - qdrant_data:/qdrant/storage
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ..
+      dockerfile: docker/backend.Dockerfile
+    env_file:
+      - path: ../.env
+        required: false
+    environment:
+      CODEPILOT_ENVIRONMENT: ${CODEPILOT_ENVIRONMENT:-development}
+      CODEPILOT_DATABASE__URL: postgresql+asyncpg://${POSTGRES_USER:-codepilot}:${POSTGRES_PASSWORD:-codepilot_dev_password}@postgres:5432/${POSTGRES_DB:-codepilot}
+      CODEPILOT_VECTOR_DB__URL: http://qdrant:6333
+      CODEPILOT_LOGGING__FORMAT: ${CODEPILOT_LOGGING__FORMAT:-json}
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      qdrant:
+        condition: service_started
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/v1/health/live', timeout=3)",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  qdrant_data:

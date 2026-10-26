@@ -1,0 +1,20 @@
+# Normalise line endings in the repository; check out native endings locally.
+* text=auto
+
+# Shell scripts, Docker and CI must keep LF.
+*.sh text eol=lf
+*.Dockerfile text eol=lf
+docker/** text eol=lf
+.github/** text eol=lf
+
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Binary assets
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.pdf binary
+*.vsix binary

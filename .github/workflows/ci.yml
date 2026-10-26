@@ -1,0 +1,73 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: lint, types, tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          version: "0.11.6"
+          enable-cache: true
+          cache-dependency-glob: backend/uv.lock
+
+      - name: Install Python 3.12
+        run: uv python install 3.12
+
+      - name: Install dependencies
+        run: uv sync --frozen --all-groups
+
+      - name: Lint
+        run: uv run ruff check .
+
+      - name: Format check
+        run: uv run ruff format --check .
+
+      - name: Type check
+        run: uv run mypy
+
+      - name: Architecture contracts
+        run: uv run lint-imports
+
+      - name: Tests
+        run: >
+          uv run pytest
+          --cov=codepilot
+          --cov-report=term-missing
+          --cov-report=xml
+          --cov-fail-under=90
+
+      - name: Upload coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: backend/coverage.xml
+          if-no-files-found: ignore
+
+  container:
+    name: container build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate compose file
+        run: docker compose -f docker/compose.yaml config --quiet
+
+      - name: Build backend image
+        run: docker build -f docker/backend.Dockerfile -t codepilot-backend:ci .
