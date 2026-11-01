@@ -15,6 +15,7 @@ import structlog
 from codepilot import __version__
 from codepilot.config.settings import Settings
 from codepilot.db.engine import Database
+from codepilot.llm.registry import ProviderRegistry
 from codepilot.services.health import HealthService, PostgresProbe, QdrantProbe
 from codepilot.vector_db.client import QdrantDatabase
 
@@ -34,6 +35,7 @@ class AppContainer:
         self._started_at = time.monotonic()
         self._database = Database(settings.database)
         self._vector_db = QdrantDatabase(settings.vector_db)
+        self._llm_registry = ProviderRegistry(settings.llm)
         self._health_service = HealthService(
             probes=(
                 PostgresProbe(self._database),
@@ -61,6 +63,11 @@ class AppContainer:
         return self._vector_db
 
     @property
+    def llm_registry(self) -> ProviderRegistry:
+        """Ownership of configured LLM providers."""
+        return self._llm_registry
+
+    @property
     def health_service(self) -> HealthService:
         """Readiness service used by the health router."""
         return self._health_service
@@ -78,6 +85,7 @@ class AppContainer:
         results = await asyncio.gather(
             self._database.dispose(),
             self._vector_db.close(),
+            self._llm_registry.close(),
             return_exceptions=True,
         )
         for result in results:

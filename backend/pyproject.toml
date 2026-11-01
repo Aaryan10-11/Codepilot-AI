@@ -13,6 +13,9 @@ dependencies = [
     "asyncpg>=0.30,<0.31",
     "qdrant-client>=1.12,<2.0",
     "httpx>=0.27,<1.0",
+    "openai>=3.42.0",
+    "anthropic>=2.3.0",
+    "google-genai>=2.34.0",
 ]
 
 [dependency-groups]
@@ -132,7 +135,22 @@ forbidden_modules = [
 name = "API does not touch infrastructure directly"
 type = "forbidden"
 source_modules = ["codepilot.api"]
-forbidden_modules = ["codepilot.db", "codepilot.vector_db"]
-# The dependency wiring module is allowed to import the composition root; the
-# ignore below stops the indirect chain at that single, reviewed edge.
-ignore_imports = ["codepilot.api.deps -> codepilot.container"]
+forbidden_modules = ["codepilot.db", "codepilot.vector_db", "codepilot.llm.providers"]
+# The dependency wiring module is allowed to import the composition root and
+# the LLM contract owner; the ignores below stop these indirect chains at
+# these single, reviewed edges.
+ignore_imports = [
+    "codepilot.api.deps -> codepilot.container",
+    "codepilot.api.deps -> codepilot.llm.registry",
+]
+
+[[tool.importlinter.contracts]]
+name = "LLM layer stays below services and API"
+type = "forbidden"
+source_modules = ["codepilot.llm"]
+forbidden_modules = [
+    "codepilot.api",
+    "codepilot.services",
+    "codepilot.container",
+    "codepilot.app",
+]

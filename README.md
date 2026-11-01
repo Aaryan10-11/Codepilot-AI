@@ -4,8 +4,10 @@ A production-oriented AI coding agent for DSA solving, debugging, code generatio
 and codebase understanding — with a FastAPI backend, retrieval-augmented context,
 three cooperating agents, and a VS Code extension.
 
-> **Status: Milestone 0 complete.** The foundation boots, reports dependency
-> health, and is covered by tests, strict typing, and architecture contracts.
+> **Status: Milestone 1 complete.** The foundation boots, reports dependency
+> health, and every supported LLM provider (OpenAI, Anthropic, Gemini,
+> DeepSeek) is reachable through a typed, retry-aware registry covered by
+> tests, strict typing, and architecture contracts.
 > The agents, RAG pipeline, sandbox, and extension land in later milestones
 > (see [Roadmap](#roadmap)).
 
@@ -240,8 +242,8 @@ Milestone 1 and read by their adapters only.
 | # | Milestone | State |
 |---|---|---|
 | **M0** | Foundation: config, logging, DI, health, Docker, CI | **Done** |
-| M1 | LLM abstraction: OpenAI, Anthropic, Gemini, DeepSeek, streaming, retries | Next |
-| M2 | Tool layer: sandboxed file/search/git tools, approvals, audit log | Planned |
+| **M1** | LLM abstraction: OpenAI, Anthropic, Gemini, DeepSeek, streaming, retries | **Done** |
+| M2 | Tool layer: sandboxed file/search/git tools, approvals, audit log | Next |
 | M3 | Docker execution sandbox for Python, C++, Java | Planned |
 | M4 | Tree-sitter parsing, incremental indexing, embeddings, Qdrant | Planned |
 | M5 | Hybrid retrieval, reranking, token-budgeted context packing | Planned |

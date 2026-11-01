@@ -11,6 +11,7 @@ from typing import Annotated
 from fastapi import Depends, Request
 
 from codepilot.container import AppContainer
+from codepilot.llm.registry import ProviderRegistry
 from codepilot.services.health import HealthService
 
 
@@ -29,4 +30,12 @@ def get_health_service(
     return container.health_service
 
 
+def get_llm_registry(
+    container: Annotated[AppContainer, Depends(get_container)],
+) -> ProviderRegistry:
+    """Expose the configured LLM providers."""
+    return container.llm_registry
+
+
 HealthServiceDep = Annotated[HealthService, Depends(get_health_service)]
+LLMRegistryDep = Annotated[ProviderRegistry, Depends(get_llm_registry)]
