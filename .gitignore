@@ -29,6 +29,9 @@ coverage.xml
 .DS_Store
 Thumbs.db
 
+# Design-skill working artifacts (generated design direction snapshots)
+.taste-skill/
+
 # Node (VS Code extension, later milestones)
 node_modules/
 out/

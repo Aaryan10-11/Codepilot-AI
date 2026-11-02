@@ -4,10 +4,13 @@ A production-oriented AI coding agent for DSA solving, debugging, code generatio
 and codebase understanding — with a FastAPI backend, retrieval-augmented context,
 three cooperating agents, and a VS Code extension.
 
-> **Status: Milestone 1 complete.** The foundation boots, reports dependency
-> health, and every supported LLM provider (OpenAI, Anthropic, Gemini,
-> DeepSeek) is reachable through a typed, retry-aware registry covered by
-> tests, strict typing, and architecture contracts.
+> **Status: Milestone 1 complete + first web frontend.** The backend foundation
+> boots, reports dependency health, and every supported LLM provider (OpenAI,
+> Anthropic, Gemini, DeepSeek) is reachable through a typed, retry-aware
+> registry covered by tests, strict typing, and architecture contracts. A
+> React + TypeScript web client now lives in [`frontend/`](frontend/) and
+> consumes the backend contract defined by M0–M1 (providers, health) plus the
+> WebSocket/agent-event contracts lands land with later milestones.
 > The agents, RAG pipeline, sandbox, and extension land in later milestones
 > (see [Roadmap](#roadmap)).
 
@@ -83,9 +86,13 @@ backend/
 docker/
   compose.yaml      PostgreSQL + Qdrant + backend
   backend.Dockerfile
-frontend/           VS Code extension (Milestone 10)
+frontend/           Web client: React 19 + TypeScript + Vite + Tailwind v4
+                    (chat workspace, DSA practice, settings, context panel)
 docs/               architecture and ADRs
 ```
+
+The VS Code extension (Milestone 10) will be added as a sibling package when
+that milestone lands.
 
 Later milestones add `agents/`, `llm/`, `rag/`, `embeddings/`, `parser/`,
 `tools/`, `execution/`, `memory/`, and `prompts/` at the same level — each with a
@@ -151,6 +158,42 @@ curl -i http://127.0.0.1:8000/v1/health/ready
   ]
 }
 ```
+
+### 4. Run the web frontend
+
+Requires Node 20+ (built and tested on Node 24).
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+The app is now at <http://localhost:5173>. The Vite dev server proxies `/v1`
+(REST) and `/ws` (agent WebSocket) to the backend on `127.0.0.1:8000`, so with
+the backend running the combined stack is: backend `:8000` + web app `:5173`.
+
+PowerShell users may need to allow script execution for the backend venv once
+per session:
+
+```powershell
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy RemoteSigned
+& .\backend\.venv\Scripts\Activate.ps1
+```
+
+Frontend quality gates:
+
+```bash
+cd frontend
+npm run typecheck   # tsc --noEmit (strict)
+npm run build       # production build (outputs dist/)
+npm run preview     # serve the production build locally
+```
+
+Until the session/agent milestones (M7–M8) land, chat sends return the
+backend's typed error envelope; the UI surfaces them honestly instead of
+faking agent activity. `GET /v1/providers` and the health endpoints are live
+today and drive the Settings page.
 
 ### Full stack in Docker
 
@@ -243,13 +286,14 @@ Milestone 1 and read by their adapters only.
 |---|---|---|
 | **M0** | Foundation: config, logging, DI, health, Docker, CI | **Done** |
 | **M1** | LLM abstraction: OpenAI, Anthropic, Gemini, DeepSeek, streaming, retries | **Done** |
+| — | Web frontend: React 19 + TS chat workspace, DSA practice, settings | **Done (ahead of M7–M8; chat waits on the agent API)** |
 | M2 | Tool layer: sandboxed file/search/git tools, approvals, audit log | Next |
 | M3 | Docker execution sandbox for Python, C++, Java | Planned |
 | M4 | Tree-sitter parsing, incremental indexing, embeddings, Qdrant | Planned |
 | M5 | Hybrid retrieval, reranking, token-budgeted context packing | Planned |
 | M6 | Context, Solver, and Reviewer agents + bounded orchestration | Planned |
 | M7 | PostgreSQL persistence, memory, past-run retrieval | Planned |
-| M8 | Chat/SSE/WebSocket API, auth, tracing | Planned |
+| M8 | Chat/SSE/WebSocket API, auth, tracing — lights up the frontend agent runs | Planned |
 | M9 | DSA pipeline: 8-part solutions, judge, knowledge base | Planned |
 | M10 | VS Code extension: chat, diff apply, indexing | Planned |
 | M11 | Hardening: E2E, load, security, eval harness | Planned |
