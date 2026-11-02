@@ -12,7 +12,7 @@
 
 ---
 
-## 🚀 Live Demo
+## 🚀 UI Snapshot 
 
 ![CodePilot AI Frontend](docs/frontend-screenshot.png)
 
@@ -231,10 +231,4 @@ Contributions welcome! Please ensure:
 
 ---
 
-## 📜 License
-
-License to be selected before first public release.
-
----
-
-Made with ❤️ by the CodePilot team.
+Made with ❤️ by Aaryan Nagrale :).
