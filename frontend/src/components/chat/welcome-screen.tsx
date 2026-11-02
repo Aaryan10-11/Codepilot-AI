@@ -1,21 +1,25 @@
 import { motion } from "framer-motion";
-import { BookOpen, Bug, Lightbulb, ShieldCheck, Workflow } from "lucide-react";
+import { BookOpen, Bug, Lightbulb, ShieldCheck } from "lucide-react";
 import { useChatStore } from "../../stores/chat";
-import { Composer } from "./composer";
+import { useSettingsStore } from "../../stores/settings";
 
 const SUGGESTIONS = [
-  { icon: Workflow, title: "Solve a DSA problem", prompt: "Solve this DSA problem with an optimized solution: Two Sum" },
   { icon: Bug, title: "Debug my code", prompt: "Debug this error in my code" },
-  { icon: Lightbulb, title: "Explain this algorithm", prompt: "Explain this algorithm" },
-  { icon: ShieldCheck, title: "Review my code", prompt: "Review my code" },
-  { icon: BookOpen, title: "Understand my codebase", prompt: "Understand my codebase" },
+  { icon: Lightbulb, title: "Explain this algorithm", prompt: "Explain this sorting algorithm and its complexity analysis" },
+  { icon: ShieldCheck, title: "Review & improve", prompt: "Review this code for security issues, complexity, and suggest improvements" },
+  { icon: BookOpen, title: "Understand codebase", prompt: "Understand the architecture of this FastAPI application and its components" },
 ];
 
 export function WelcomeScreen({ sessionId }: { sessionId?: string | null }) {
   const { send } = useChatStore();
+  const settings = useSettingsStore();
 
-  const onSuggest = (prompt: string) => {
-    void send({ sessionId: sessionId ?? undefined, content: prompt, model: undefined });
+  const onSuggest = async (prompt: string) => {
+    try {
+      await send({ sessionId: sessionId ?? undefined, content: prompt, model: settings.models.solver });
+    } catch (error) {
+      console.error("Send failed:", error);
+    }
   };
 
   return (
@@ -26,25 +30,35 @@ export function WelcomeScreen({ sessionId }: { sessionId?: string | null }) {
       transition={{ duration: 0.25, ease: "easeOut" }}
     >
       <div className="flex flex-col items-center gap-4 text-center">
-        <div className="text-[44px] font-semibold tracking-[-0.03em] text-text">Think. Code. Verify.</div>
-        <p className="max-w-xl text-base text-muted">CodePilot turns intent into reviewed, tested, optimized code — grounded in your actual codebase.</p>
+        <div className="text-[38px] font-bold tracking-tight text-text sm:text-[44px]">
+          Think. Code. Verify.
+        </div>
+        <p className="max-w-xl text-base text-muted">
+          CodePilot turns intent into reviewed, tested, optimized code — grounded in your actual codebase.
+        </p>
       </div>
 
-      <Composer sessionId={sessionId} placeholder="Describe the bug, the algorithm, or the feature…" />
-
-      <div className="grid w-full max-w-2xl grid-cols-1 gap-2 sm:grid-cols-2">
-        {SUGGESTIONS.map((suggestion) => {
+      <div className="flex flex-col gap-3 w-full max-w-2xl">
+        {SUGGESTIONS.map((suggestion, idx) => {
           const Icon = suggestion.icon;
           return (
-            <button
+            <motion.div
               key={suggestion.title}
-              type="button"
-              onClick={() => onSuggest(suggestion.prompt)}
-              className="flex items-start gap-3 rounded-[10px] border border-border bg-surface p-3 text-left transition-colors hover:border-control hover:bg-raised"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: idx * 0.05, duration: 0.3 }}
             >
-              <Icon className="mt-0.5 h-[16px] w-[16px] shrink-0 text-accent" strokeWidth={1.75} />
-              <span className="text-sm text-text">{suggestion.title}</span>
-            </button>
+              <button
+                type="button"
+                onClick={() => onSuggest(suggestion.prompt)}
+                className="flex w-full items-start gap-4 rounded-[12px] border border-border bg-surface p-4 text-left transition-all hover:border-control hover:shadow-md"
+              >
+                <Icon className="mt-0.5 h-5 w-5 shrink-0 text-accent" strokeWidth={1.75} />
+                <div className="flex-1">
+                  <span className="text-sm font-medium text-text">{suggestion.title}</span>
+                </div>
+              </button>
+            </motion.div>
           );
         })}
       </div>

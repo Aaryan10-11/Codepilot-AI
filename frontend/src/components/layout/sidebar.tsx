@@ -1,4 +1,4 @@
-import { Bot, Code2, FolderGit2, MessageSquare, Settings, ShieldCheck, SquarePen, X } from "lucide-react";
+import { Bot, Code2, FolderGit2, MessageSquare, Settings, SquarePen, X } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useUIStore } from "../../stores/ui";
 import { useAgentsStore } from "../../stores/agents";
@@ -7,9 +7,9 @@ import { StatusPill } from "../ui/status-pill";
 
 const NAV_ITEMS = [
   { to: "/", label: "Chat", icon: MessageSquare, match: (p: string) => p === "/" },
-  { to: "/dsa", label: "DSA Practice", icon: Code2, match: (p: string) => p.startsWith("/dsa") },
-  { to: "/review", label: "Code Review", icon: ShieldCheck, match: (p: string) => p.startsWith("/review") },
-  { to: "/projects", label: "Projects", icon: FolderGit2, match: (p: string) => p.startsWith("/projects") },
+  { to: "/agents", label: "Agent Studio", icon: Bot, match: (p: string) => p.startsWith("/agents") },
+  { to: "/codebase", label: "Codebase", icon: FolderGit2, match: (p: string) => p.startsWith("/codebase") },
+  { to: "/dsa", label: "Problems", icon: Code2, match: (p: string) => p.startsWith("/dsa") },
   { to: "/settings", label: "Settings", icon: Settings, match: (p: string) => p.startsWith("/settings") },
 ];
 

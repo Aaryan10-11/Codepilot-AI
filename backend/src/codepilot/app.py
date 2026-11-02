@@ -15,7 +15,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from codepilot import __version__
 from codepilot.api.errors import register_exception_handlers
 from codepilot.api.middleware import CorrelationMiddleware
-from codepilot.api.routers import health, providers
+from codepilot.api.routers import health, providers, sessions
 from codepilot.config.logging import configure_logging
 from codepilot.config.settings import Environment, Settings
 from codepilot.container import AppContainer
@@ -66,6 +66,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         openapi_tags=[
             {"name": "health", "description": "Liveness and dependency readiness."},
             {"name": "providers", "description": "LLM provider configuration status."},
+            {"name": "sessions", "description": "Chat sessions and messages."},
         ],
     )
 
@@ -85,4 +86,5 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     register_exception_handlers(app)
     app.include_router(health.router)
     app.include_router(providers.router)
+    app.include_router(sessions.router)
     return app

@@ -1,9 +1,10 @@
-import { useEffect, useRef, useState, type KeyboardEvent } from "react";
-import { ArrowUp, Square } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Square } from "lucide-react";
 import { useChatStore } from "../../stores/chat";
 import { useSettingsStore } from "../../stores/settings";
 import { Button } from "../ui/button";
 import { Textarea } from "../ui/inputs";
+import { Select } from "../ui/inputs";
 
 export interface ComposerProps {
   sessionId?: string | null;
@@ -14,7 +15,7 @@ export function Composer({ sessionId, placeholder }: ComposerProps) {
   const [value, setValue] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const { send, isStreaming, stop } = useChatStore();
-  const { models } = useSettingsStore();
+  const { models, setModel, setProviderId, providerOptions } = useSettingsStore();
 
   const autoresize = () => {
     const el = textareaRef.current;
@@ -27,7 +28,7 @@ export function Composer({ sessionId, placeholder }: ComposerProps) {
     autoresize();
   }, [value]);
 
-  const onKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
+  const onKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault();
       void submit();
@@ -41,13 +42,16 @@ export function Composer({ sessionId, placeholder }: ComposerProps) {
     setValue("");
   };
 
-  const canSend = value.trim().length > 0 && !isStreaming;
+  // Build model options with unique keys
+  const modelOptions = [
+    { label: "Solver model", value: models.solver },
+  ];
 
   return (
     <div className="w-full">
       <div className="rounded-[10px] border border-border bg-surface p-3 focus-within:border-accent">
         <Textarea
-          ref={textareaRef as never}
+          ref={textareaRef}
           value={value}
           onChange={(event) => {
             setValue(event.target.value);
@@ -65,10 +69,30 @@ export function Composer({ sessionId, placeholder }: ComposerProps) {
               Stop
             </Button>
           ) : (
-            <Button size="sm" onClick={submit} disabled={!canSend}>
-              <ArrowUp className="h-3.5 w-3.5" strokeWidth={2} />
-              Send
-            </Button>
+            <div className="flex items-center gap-2">
+              <Select
+                value={models.solver}
+                onChange={(event: React.ChangeEvent<HTMLSelectElement>) => setModel("solver", event.target.value)}
+                aria-label="Model"
+              >
+                {modelOptions.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
+              </Select>
+              {providerOptions.map((opt) => (
+                <Button
+                  key={opt.id}
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => setProviderId(opt.id)}
+                  className="text-xs"
+                >
+                  {opt.name}
+                </Button>
+              ))}
+            </div>
           )}
         </div>
       </div>

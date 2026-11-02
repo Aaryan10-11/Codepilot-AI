@@ -13,10 +13,11 @@ export function ChatWorkspacePage() {
   const isEmpty = messages.length === 0;
 
   return (
-    <div className="flex h-full min-h-0 flex-1 flex-col">
-      <header className="flex items-center justify-between gap-4 pb-4">
+    <div className="flex h-full min-h-0 flex-1 flex-col overflow-hidden">
+      {/* Header with provider health */}
+      <header className="flex items-center justify-between gap-4 border-b border-border bg-surface px-6 pb-3 pt-3">
         <div>
-          <h1 className="text-title font-semibold tracking-tight">Chat</h1>
+          <h1 className="text-title font-semibold tracking-tight">Chat Workspace</h1>
           <p className="text-small text-muted">Context → Solve → Review → Execute</p>
         </div>
         <div className="flex items-center gap-2">
@@ -26,6 +27,7 @@ export function ChatWorkspacePage() {
         </div>
       </header>
 
+      {/* Main content */}
       <div className="min-h-0 flex-1 overflow-y-auto">
         {isEmpty ? (
           <WelcomeScreen sessionId={sessionId} />
@@ -43,7 +45,8 @@ export function ChatWorkspacePage() {
         )}
       </div>
 
-      <div className="pt-4">
+      {/* Composer section */}
+      <div className="border-t border-border p-4">
         <Composer sessionId={sessionId} />
       </div>
     </div>

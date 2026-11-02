@@ -7,6 +7,13 @@ export interface AgentModels {
   context: string;
 }
 
+export interface Provider {
+  id: string;
+  name: string;
+  apiKeyVar: string;
+  defaultModel: string;
+}
+
 interface SettingsState {
   providerId: string;
   models: AgentModels;
@@ -15,6 +22,7 @@ interface SettingsState {
   embeddingModel: string;
   vectorDbUrl: string;
   dockerImage: string;
+  providerOptions: Provider[];
   setProviderId: (providerId: string) => void;
   setModel: (agent: keyof AgentModels, model: string) => void;
   setDefaultLanguage: (language: string) => void;
@@ -24,14 +32,22 @@ interface SettingsState {
   setDockerImage: (dockerImage: string) => void;
 }
 
+const PROVIDER_OPTIONS: Provider[] = [
+  { id: "openai", name: "OpenAI", apiKeyVar: "OPENAI_API_KEY", defaultModel: "gpt-4.1" },
+  { id: "anthropic", name: "Anthropic", apiKeyVar: "ANTHROPIC_API_KEY", defaultModel: "claude-sonnet-4-5" },
+  { id: "google", name: "Google", apiKeyVar: "GEMINI_API_KEY", defaultModel: "gemini-2.5-flash" },
+  { id: "deepseek", name: "DeepSeek", apiKeyVar: "DEEPSEEK_API_KEY", defaultModel: "deepseek-chat" },
+];
+
 export const DEFAULT_SETTINGS = {
   providerId: "openai",
-  models: { solver: "gpt-4o", reviewer: "gpt-4o-mini", context: "gpt-4o-mini" },
+  models: { solver: "gpt-4.1", reviewer: "claude-sonnet-4-5", context: "gpt-3.5-turbo" },
   defaultLanguage: "python",
   ragTopK: 5,
   embeddingModel: "text-embedding-3-small",
   vectorDbUrl: "http://localhost:6333",
   dockerImage: "codepilot-solver:latest",
+  providerOptions: PROVIDER_OPTIONS,
 };
 
 export const useSettingsStore = create<SettingsState>()(
